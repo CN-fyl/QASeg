@@ -64,7 +64,7 @@ class SourceStyleBank(nn.Module):
         return (1.0 - alpha) * feature + alpha * transferred
 
 
-class ICRSegNNUNet(nn.Module):
+class QASegNNUNet(nn.Module):
     """Existing Masked nnU-Net with optional shallow source-style intervention."""
 
     def __init__(self, num_sources: int = 4):

@@ -34,16 +34,16 @@ from protocol_v1_dataset import ORGAN_ORDER, ProtocolV1Dataset, as_device
 from reproducibility import seed_everything, seeded_generator, seed_worker
 from sliding_window import sliding_window_logits
 
-from icrseg import ICRSegNNUNet, RiskEstimator
-from icrseg.augment import strong_intensity_augment, weak_intensity_augment
-from icrseg.losses import consistency_loss, known_organ_loss, pseudo_label_loss, soft_exclusion_loss
-from icrseg.risk import STAT_INDEX, STAT_NAMES, extract_candidates, risk_supervision_loss, select_pseudo_labels
+from qaseg import QASegNNUNet, RiskEstimator
+from qaseg.augment import strong_intensity_augment, weak_intensity_augment
+from qaseg.losses import consistency_loss, known_organ_loss, pseudo_label_loss, soft_exclusion_loss
+from qaseg.risk import STAT_INDEX, STAT_NAMES, extract_candidates, risk_supervision_loss, select_pseudo_labels
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Train ICRSeg on SharedProtocol")
+    parser = argparse.ArgumentParser(description="Train QASeg on SharedProtocol")
     parser.add_argument("--manifest", type=Path, default=Path("/path/to/project2/protocol/manifest.json"))
-    parser.add_argument("--output", type=Path, default=Path("/path/to/project2/results/ICRSeg/SharedProtocol/full/model"))
+    parser.add_argument("--output", type=Path, default=Path("/path/to/project2/results/QASeg/SharedProtocol/full/model"))
     parser.add_argument("--epochs", type=int, default=500)
     parser.add_argument("--run-epochs", type=int)
     parser.add_argument("--batch-size", type=int, default=1)
@@ -534,7 +534,7 @@ def main():
         loader_kwargs["prefetch_factor"] = args.prefetch_factor
     loader = DataLoader(train_set, **loader_kwargs)
 
-    student = ICRSegNNUNet().to(device)
+    student = QASegNNUNet().to(device)
     teacher = copy.deepcopy(student).to(device).eval()
     teacher.requires_grad_(False)
     history_teacher = copy.deepcopy(student).to(device).eval()
@@ -675,7 +675,7 @@ def main():
     progress_bar = (
         tqdm(
             total=total_epochs,
-            desc="ICRSeg training",
+            desc="QASeg training",
             unit="epoch",
             position=0,
             dynamic_ncols=True,
@@ -684,7 +684,7 @@ def main():
         if show_progress else None
     )
     start_message = (
-        f"[ICRSeg] start epoch {start_epoch + 1}/{stop_epoch} "
+        f"[QASeg] start epoch {start_epoch + 1}/{stop_epoch} "
         f"| total={total_epochs} | started={format_timestamp(datetime.now().astimezone())}"
     )
     if show_progress:
@@ -1226,14 +1226,14 @@ def main():
                 refresh=True,
             )
             tqdm.write(
-                f"[ICRSeg] epoch {epoch + 1}/{stop_epoch} done "
+                f"[QASeg] epoch {epoch + 1}/{stop_epoch} done "
                 f"| stage={stage} | time={format_duration(epoch_wall_seconds)} "
                 f"| remaining={format_duration(remaining_seconds)} "
                 f"| finish={format_timestamp(estimated_finish)}"
             )
         else:
             print(
-                f"[ICRSeg] epoch {epoch + 1}/{stop_epoch} done "
+                f"[QASeg] epoch {epoch + 1}/{stop_epoch} done "
                 f"| stage={stage} | time={format_duration(epoch_wall_seconds)} "
                 f"| remaining={format_duration(remaining_seconds)} "
                 f"| finish={format_timestamp(estimated_finish)}",
@@ -1244,7 +1244,7 @@ def main():
         progress_bar.close()
     total_wall_seconds = time.perf_counter() - training_started
     completion_message = (
-        f"[ICRSeg] training complete | elapsed={format_duration(total_wall_seconds)} "
+        f"[QASeg] training complete | elapsed={format_duration(total_wall_seconds)} "
         f"| finished={format_timestamp(datetime.now().astimezone())}"
     )
     if show_progress:

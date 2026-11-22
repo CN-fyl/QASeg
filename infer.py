@@ -27,7 +27,7 @@ from evaluate_shared_protocol import (
 from reproducibility import seed_everything
 from sliding_window import sliding_window_logits
 
-from icrseg import ICRSegNNUNet
+from qaseg import QASegNNUNet
 
 
 def parse_four_values(text: str, name: str, minimum=0.0, maximum=None) -> tuple[float, ...]:
@@ -86,7 +86,7 @@ def restore_probability(probability, preprocessed_path, reference, output):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="ICRSeg inference with the student nnU-Net only")
+    parser = argparse.ArgumentParser(description="QASeg inference with the student nnU-Net only")
     parser.add_argument("--manifest", type=Path, default=Path("/path/to/project2/protocol/manifest.json"))
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -120,7 +120,7 @@ def main():
     )
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    wrapper = ICRSegNNUNet()
+    wrapper = QASegNNUNet()
     checkpoint = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
     state_dict = checkpoint.get("inference_state_dict")
     if state_dict is None:
